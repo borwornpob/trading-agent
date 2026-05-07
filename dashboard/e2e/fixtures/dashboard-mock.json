@@ -1,0 +1,57 @@
+{
+  "config": {
+    "symbol": "GC=F",
+    "broker_symbol": "XAUUSD",
+    "bar_frequency": "1h",
+    "shadow_mode": true,
+    "kill_switch": false,
+    "grid_enabled": true
+  },
+  "risk": {
+    "shadow_mode": true,
+    "kill_switch": false,
+    "persisted_kill": false,
+    "day_utc": "2026-04-27",
+    "realized_pnl": 0,
+    "consecutive_losses": 0,
+    "recovery_mode": false,
+    "sizing_multiplier": 1
+  },
+  "last_cycle": {
+    "timestamp_utc": "2026-04-27T16:51:49.000000+00:00",
+    "signal": {
+      "direction": "long",
+      "pred_class": 3,
+      "score": 0.66,
+      "p_up": 0.829153,
+      "p_down": 0.169422,
+      "regime": "trending_up",
+      "sentiment": 0,
+      "event_risk": false,
+      "conviction": "high"
+    },
+    "execution_plan": {
+      "mode": "trend",
+      "direction": "long",
+      "stop_loss": 4558.98,
+      "take_profit": 5048.95
+    },
+    "sr_prediction": {
+      "predicted_high": 4732.9,
+      "predicted_low": 4642.68,
+      "bounce_probability": 0.557
+    },
+    "volatility": {
+      "conditional_vol": 0.275,
+      "vol_regime": "high",
+      "trailing_stop_distance": 163.32
+    },
+    "orders_submitted": [],
+    "notes": ["shadow_mode: no_orders_submitted"]
+  },
+  "news": {
+    "headlines": [],
+    "sentiment": 0,
+    "event_risk": false
+  }
+}

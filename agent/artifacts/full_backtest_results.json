@@ -1,0 +1,26 @@
+{
+  "directional": {
+    "total_return_pct": 35.624545454545455,
+    "annualized_return": 187.0318181818182,
+    "annualized_vol": 26.755,
+    "sharpe": 7.168318181818182,
+    "sortino": 22.0855,
+    "max_drawdown_pct": -5.01,
+    "calmar": 68.75859090909091,
+    "win_rate": 0.6221818181818182,
+    "num_trades": 48.0,
+    "profit_factor": 4.605772727272728,
+    "regime": "trending_up",
+    "n_trades": 9.727272727272727,
+    "grid_pnl": 4641.619250088034
+  },
+  "grid": {
+    "total_pnl": 7981.54,
+    "n_grids": 444,
+    "n_tp": 417,
+    "n_sl": 27,
+    "avg_pnl_per_grid": 17.98
+  },
+  "n_folds": 22,
+  "combined_pnl": 8017.17
+}

@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Artifacts
+artifacts/*.parquet
+artifacts/*.pkl
+artifacts/*.json
+artifacts/improvement_runs/
+!artifacts/.gitkeep
+agent/artifacts/risk_state.json
+logs/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.next/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

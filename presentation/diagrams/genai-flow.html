@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content</head>="width=1200">
+  <title>Gold Trading Agent – GenAI in the Loop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #09090b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: auto</title></style>;
+    }
+  </style>
+</head>
+<body>
+<svg viewBox="0 0 1200 800" width="1200" height="800" xmlns="http://www.w3.org/2000/svg" font-family="Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="</body></defs>0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#09090b"/>
+      <stop offset="100%" stop-color="#0c1220"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="pipeLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0"/>
+      <stop offset="10%" stop-color="#fbbf24" stop-opacity="0.4"/>
+      <stop offset="90%" stop-color="#fbbf24" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#fbbf24" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrowGold" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0.5 L8,3.5 L0,6.5 L2,3.5Z" fill="#fbbf24" opacity="0.8"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0.5 L8,3.5 L0,6.5 L2,3.5Z" fill="#3b82f6" opacity="0.8"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0.5 L8,3.5 L0,6.5 L2,3.5Z" fill="#a78bfa" opacity="0.8"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0.5 L8,3.5 L0,6.5 L2,3.5Z" fill="#22c55e" opacity="0.8"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0.5 L8,3.5 L0,6.5 L2,3.5Z" fill="#ef4444" opacity="0.8"/>
+    </marker>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="0.5" fill="#fff" opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <!-- ═══════════ BACKGROUND ═══════════ -->
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect width="1200" height="800" fill="url(#dots)"/>
+
+  <!-- ═══════════ TITLE ═══════════ -->
+  <text x="600" y="38" text-anchor="middle" fill="#fbbf24" font-size="26" font-weight="800" letter-spacing="0.5">🤖 GenAI in the Loop</text>
+  <text x="600" y="60" text-anchor="middle" fill="#52525b" font-size="11.5" font-weight="600" letter-spacing="3.5">SENTIMENT PIPELINE · RSS → GLM-4 FLASH → SIGNAL FILTER</text>
+  <line x1="40" y1="74" x2="1160" y2="74" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <!-- ═══════════ PIPELINE BACKBONE ═══════════ -->
+  <line x1="40" y1="170" x2="1160" y2="170" stroke="url(#pipeLine)" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- ═══════════ STEP 1: RSS FEED INPUT ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="28" y="100" width="148" height="140" rx="10" fill="#141420" stroke="#3b82f6" stroke-width="1.5"/>
+  </g>
+  <rect x="28" y="100" width="148" height="3" rx="1.5" fill="#3b82f6"/>
+  <circle cx="102" cy="92" r="12" fill="#18181b" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="102" y="96.5" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700">1</text>
+  <text x="102" y="126" text-anchor="middle" font-size="22">📡</text>
+  <text x="102" y="148" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="700" letter-spacing="1">RSS FEED</text>
+  <text x="102" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">INPUT</text>
+  <text x="102" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">Multiple Sources</text>
+  <text x="102" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">5-min Poll Cycle</text>
+
+  <!-- Example Input Box for Step 1 -->
+  <rect x="28" y="248" width="148" height="68" rx="6" fill="#0d1117" stroke="#21262d" stroke-width="0.8"/>
+  <text x="38" y="262" fill="#3b82f6" font-size="7" font-weight="700" letter-spacing="1.5">RAW INPUT</text>
+  <text x="38" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8" fill="#64748b">
+    <tspan x="38" dy="0">• Reuters Gold Feed</tspan>
+    <tspan x="38" dy="11">• Bloomberg FX</tspan>
+    <tspan x="38" dy="11">• Forexlive RSS</tspan>
+  </text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="180" y1="170" x2="203" y2="170" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- ═══════════ STEP 2: NEWS FETCHER ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="208" y="100" width="148" height="140" rx="10" fill="#141420" stroke="#3b82f6" stroke-width="1.5"/>
+  </g>
+  <rect x="208" y="100" width="148" height="3" rx="1.5" fill="#3b82f6"/>
+  <circle cx="282" cy="92" r="12" fill="#18181b" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="282" y="96.5" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700">2</text>
+  <text x="282" y="126" text-anchor="middle" font-size="22">📰</text>
+  <text x="282" y="148" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="700" letter-spacing="1">FETCHER</text>
+  <text x="282" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">DEDUP &amp; CLEAN</text>
+  <text x="282" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">Similarity Filter</text>
+  <text x="282" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">Cosine &gt; 0.85</text>
+
+  <!-- Example Box for Step 2 -->
+  <rect x="208" y="248" width="148" height="68" rx="6" fill="#0d1117" stroke="#21262d" stroke-width="0.8"/>
+  <text x="218" y="262" fill="#3b82f6" font-size="7" font-weight="700" letter-spacing="1.5">AFTER DEDUP</text>
+  <text x="218" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8" fill="#64748b">
+    <tspan x="218" dy="0">"Fed signals rate</tspan>
+    <tspan x="218" dy="11"> pause amid gold</tspan>
+    <tspan x="218" dy="11"> rally to $2,400"</tspan>
+  </text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="360" y1="170" x2="383" y2="170" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- ═══════════ STEP 3: GLM-4 FLASH API ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="388" y="100" width="166" height="140" rx="10" fill="#181410" stroke="#fbbf24" stroke-width="1.5"/>
+  </g>
+  <rect x="388" y="100" width="166" height="3" rx="1.5" fill="#fbbf24"/>
+  <circle cx="471" cy="92" r="12" fill="#18181b" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="471" y="96.5" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">3</text>
+  <text x="471" y="126" text-anchor="middle" font-size="22">🧠</text>
+  <text x="471" y="148" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700" letter-spacing="1">GLM-4 FLASH</text>
+  <text x="471" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">STRUCTURED OUTPUT</text>
+  <text x="471" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">Temperature: 0.1</text>
+  <text x="471" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">JSON Mode Enforced</text>
+
+  <!-- Prompt Example Box -->
+  <rect x="388" y="248" width="166" height="68" rx="6" fill="#0d1117" stroke="#fbbf24" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="398" y="262" fill="#fbbf24" font-size="7" font-weight="700" letter-spacing="1.5">API REQUEST</text>
+  <text x="398" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="7.5" fill="#64748b">
+    <tspan x="398" dy="0">model: "glm-4-flash"</tspan>
+    <tspan x="398" dy="10">response_format:</tspan>
+    <tspan x="398" dy="10">  { "type": "json" }</tspan>
+    <tspan x="398" dy="10">system: "You are a gold</tspan>
+    <tspan x="398" dy="10">  market sentiment analyst"</tspan>
+  </text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="558" y1="170" x2="581" y2="170" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+  <!-- ═══════════ STEP 4: STRUCTURED JSON ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="586" y="100" width="166" height="140" rx="10" fill="#141020" stroke="#a78bfa" stroke-width="1.5"/>
+  </g>
+  <rect x="586" y="100" width="166" height="3" rx="1.5" fill="#a78bfa"/>
+  <circle cx="669" cy="92" r="12" fill="#18181b" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="669" y="96.5" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">4</text>
+  <text x="669" y="126" text-anchor="middle" font-size="22">📋</text>
+  <text x="669" y="148" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="700" letter-spacing="1">STRUCTURED</text>
+  <text x="669" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">JSON OUTPUT</text>
+  <text x="669" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">4 Fields Extracted</text>
+  <text x="669" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">Schema Validated</text>
+
+  <!-- JSON Example Box -->
+  <rect x="586" y="248" width="166" height="68" rx="6" fill="#0d1117" stroke="#a78bfa" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="596" y="262" fill="#a78bfa" font-size="7" font-weight="700" letter-spacing="1.5">RESPONSE JSON</text>
+  <text x="596" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="7.5">
+    <tspan fill="#a78bfa">{</tspan>
+    <tspan x="596" dy="10" fill="#79c0ff">  "sentiment"</tspan><tspan fill="#8b949e">: </tspan><tspan fill="#56d364">0.72</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="596" dy="10" fill="#79c0ff">  "confidence"</tspan><tspan fill="#8b949e">: </tspan><tspan fill="#56d364">0.89</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="596" dy="10" fill="#79c0ff">  "key_drivers"</tspan><tspan fill="#8b949e">: [...],</tspan>
+  </text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="756" y1="170" x2="779" y2="170" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrowPurple)"/>
+
+  <!-- ═══════════ STEP 5: SENTIMENT CACHE ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="784" y="100" width="148" height="140" rx="10" fill="#101418" stroke="#64748b" stroke-width="1.5"/>
+  </g>
+  <rect x="784" y="100" width="148" height="3" rx="1.5" fill="#64748b"/>
+  <circle cx="858" cy="92" r="12" fill="#18181b" stroke="#64748b" stroke-width="1.5"/>
+  <text x="858" y="96.5" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700">5</text>
+  <text x="858" y="126" text-anchor="middle" font-size="22">🗄️</text>
+  <text x="858" y="148" text-anchor="middle" fill="#94a3b8" font-size="12" font-weight="700" letter-spacing="1">CACHE</text>
+  <text x="858" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">SENTIMENT STORE</text>
+  <text x="858" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">TTL = 15 min</text>
+  <text x="858" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">Hash: Headline SHA</text>
+
+  <!-- Cache Example Box -->
+  <rect x="784" y="248" width="148" height="68" rx="6" fill="#0d1117" stroke="#21262d" stroke-width="0.8"/>
+  <text x="794" y="262" fill="#64748b" font-size="7" font-weight="700" letter-spacing="1.5">CACHE ENTRY</text>
+  <text x="794" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="7.5" fill="#64748b">
+    <tspan x="794" dy="0">key: sha256(headline)</tspan>
+    <tspan x="794" dy="10">score: 0.72</tspan>
+    <tspan x="794" dy="10">ttl: 900s</tspan>
+    <tspan x="794" dy="10">hits: 4</tspan>
+  </text>
+
+  <!-- Arrow 5→6 -->
+  <line x1="936" y1="170" x2="959" y2="170" stroke="#64748b" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- ═══════════ STEP 6: FEATURE ENGINEERING ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="964" y="100" width="148" height="140" rx="10" fill="#101418" stroke="#22c55e" stroke-width="1.5"/>
+  </g>
+  <rect x="964" y="100" width="148" height="3" rx="1.5" fill="#22c55e"/>
+  <circle cx="1038" cy="92" r="12" fill="#18181b" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="1038" y="96.5" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700">6</text>
+  <text x="1038" y="126" text-anchor="middle" font-size="22">⚙️</text>
+  <text x="1038" y="148" text-anchor="middle" fill="#22c55e" font-size="12" font-weight="700" letter-spacing="1">FEATURE</text>
+  <text x="1038" y="164" text-anchor="middle" fill="#52525b" font-size="8.5" font-weight="500">ENGINEERING</text>
+  <text x="1038" y="180" text-anchor="middle" fill="#64748b" font-size="7.5">ML Feature Vector</text>
+  <text x="1038" y="193" text-anchor="middle" fill="#64748b" font-size="7.5">3 Derived Features</text>
+
+  <!-- Feature Example Box -->
+  <rect x="964" y="248" width="148" height="68" rx="6" fill="#0d1117" stroke="#22c55e" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="974" y="262" fill="#22c55e" font-size="7" font-weight="700" letter-spacing="1.5">ML FEATURES</text>
+  <text x="974" y="278" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="7.5" fill="#64748b">
+    <tspan x="974" dy="0">sentiment_score: 0.72</tspan>
+    <tspan x="974" dy="10">confidence: 0.89</tspan>
+    <tspan x="974" dy="10">event_risk_flag: 0</tspan>
+    <tspan x="974" dy="10">driver_count: 2</tspan>
+  </text>
+
+  <!-- ═══════════ SIGNAL FILTER (Below, center) ═══════════ -->
+  <g filter="url(#glow)">
+    <rect x="440" y="345" width="320" height="110" rx="12" fill="#181410" stroke="#fbbf24" stroke-width="2"/>
+  </g>
+  <rect x="440" y="345" width="320" height="3.5" rx="1.5" fill="#fbbf24"/>
+  <circle cx="600" cy="338" r="14" fill="#18181b" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="600" y="343" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">7</text>
+
+  <text x="600" y="375" text-anchor="middle" font-size="24">🛡️</text>
+  <text x="600" y="398" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700" letter-spacing="1.5">SIGNAL FILTER</text>
+  <text x="600" y="415" text-anchor="middle" fill="#52525b" font-size="9" font-weight="500">POST-HOC OVERLAY</text>
+
+  <!-- Filter rules -->
+  <rect x="460" y="422" width="130" height="20" rx="4" fill="#22c55e" fill-opacity="0.08" stroke="#22c55e" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="525" y="436" text-anchor="middle" fill="#22c55e" font-size="8.5" font-weight="600">✓ sentiment ≥ 0.3</text>
+  <rect x="610" y="422" width="130" height="20" rx="4" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="675" y="436" text-anchor="middle" fill="#ef4444" font-size="8.5" font-weight="600">✗ event_risk = high</text>
+
+  <!-- Arrow from Feature Eng → Signal Filter -->
+  <path d="M1038,240 L1038,320 Q1038,340 1018,340 L770,340" fill="none" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)" opacity="0.7"/>
+
+  <!-- Arrow from Cache → Signal Filter -->
+  <path d="M858,240 L858,310 Q858,330 838,330 L770,340" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.3"/>
+
+  <!-- ═══════════ DETAILED JSON BREAKDOWN (Bottom Section) ═══════════ -->
+  <rect x="40" y="475" width="1120" height="310" rx="12" fill="#0d1117" stroke="#1e1e24" stroke-width="1"/>
+
+  <!-- Section Title -->
+  <rect x="56" y="484" width="260" height="24" rx="5" fill="#fbbf24" fill-opacity="0.06"/>
+  <text x="66" y="501" fill="#fbbf24" font-size="13" font-weight="700" letter-spacing="0.3">📋 End-to-End Example Trace</text>
+  <line x1="56" y1="516" x2="1140" y2="516" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <!-- ── Column 1: Input ── -->
+  <rect x="56" y="526" width="250" height="245" rx="8" fill="#0a0e14" stroke="#3b82f6" stroke-width="0.8" stroke-opacity="0.4"/>
+  <text x="181" y="546" text-anchor="middle" fill="#3b82f6" font-size="9" font-weight="700" letter-spacing="1.5">① RSS INPUT</text>
+  <line x1="66" y1="553" x2="296" y2="553" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <text x="66" y="570" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8.5" fill="#64748b">
+    <tspan x="66" dy="0">Headline:</tspan>
+    <tspan x="66" dy="14" fill="#94a3b8">"Federal Reserve signals</tspan>
+    <tspan x="66" dy="12" fill="#94a3b8">extended pause on rate hikes;</tspan>
+    <tspan x="66" dy="12" fill="#94a3b8">gold surges to $2,415 as</tspan>
+    <tspan x="66" dy="12" fill="#94a3b8">dollar weakens across the</tspan>
+    <tspan x="66" dy="12" fill="#94a3b8">board amid geopolitical</tspan>
+    <tspan x="66" dy="12" fill="#94a3b8">tensions"</tspan>
+  </text>
+  <line x1="66" y1="650" x2="296" y2="650" stroke="#1e1e24" stroke-width="0.3"/>
+  <text x="66" y="665" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8" fill="#475569">
+    <tspan x="66" dy="0">source: "reuters"</tspan>
+    <tspan x="66" dy="11">timestamp: "2024-01-15T14:32Z"</tspan>
+    <tspan x="66" dy="11">dedup_hash: "a3f2...c891"</tspan>
+    <tspan x="66" dy="11">similarity_checked: true</tspan>
+    <tspan x="66" dy="11">is_duplicate: false</tspan>
+  </text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="310" y1="648" x2="324" y2="648" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- ── Column 2: GLM-4 Prompt/Response ── -->
+  <rect x="328" y="526" width="280" height="245" rx="8" fill="#0a0e14" stroke="#fbbf24" stroke-width="0.8" stroke-opacity="0.4"/>
+  <text x="468" y="546" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="700" letter-spacing="1.5">② GLM-4 FLASH API</text>
+  <line x1="338" y1="553" x2="598" y2="553" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <text x="338" y="568" fill="#fbbf24" font-size="7.5" font-weight="600" letter-spacing="1" opacity="0.6">PROMPT</text>
+  <text x="338" y="582" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8" fill="#64748b">
+    <tspan x="338" dy="0">Analyze this gold market headline</tspan>
+    <tspan x="338" dy="11">and return JSON with: sentiment</tspan>
+    <tspan x="338" dy="11">(-1 to 1), confidence (0-1),</tspan>
+    <tspan x="338" dy="11">key_drivers (array of strings),</tspan>
+    <tspan x="338" dy="11">event_risk (low|medium|high).</tspan>
+  </text>
+
+  <line x1="338" y1="636" x2="598" y2="636" stroke="#1e1e24" stroke-width="0.3"/>
+  <text x="338" y="651" fill="#a78bfa" font-size="7.5" font-weight="600" letter-spacing="1" opacity="0.6">RESPONSE</text>
+  <text x="338" y="666" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8">
+    <tspan fill="#a78bfa">{</tspan>
+    <tspan x="348" dy="12" fill="#79c0ff">"sentiment"</tspan><tspan fill="#8b949e">: </tspan><tspan fill="#56d364">0.72</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="348" dy="12" fill="#79c0ff">"confidence"</tspan><tspan fill="#8b949e">: </tspan><tspan fill="#56d364">0.89</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="348" dy="12" fill="#79c0ff">"key_drivers"</tspan><tspan fill="#8b949e">: [</tspan>
+    <tspan x="358" dy="12" fill="#ffa657">"Fed rate pause"</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="358" dy="12" fill="#ffa657">"USD weakness"</tspan><tspan fill="#8b949e">,</tspan>
+    <tspan x="358" dy="12" fill="#ffa657">"geopolitical risk"</tspan>
+    <tspan x="348" dy="12" fill="#8b949e">],</tspan>
+    <tspan x="348" dy="12" fill="#79c0ff">"event_risk"</tspan><tspan fill="#8b949e">: </tspan><tspan fill="#ffa657">"medium"</tspan>
+    <tspan fill="#a78bfa">}</tspan>
+  </text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="612" y1="648" x2="626" y2="648" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- ── Column 3: ML Features ── -->
+  <rect x="630" y="526" width="230" height="245" rx="8" fill="#0a0e14" stroke="#22c55e" stroke-width="0.8" stroke-opacity="0.4"/>
+  <text x="745" y="546" text-anchor="middle" fill="#22c55e" font-size="9" font-weight="700" letter-spacing="1.5">③ ML FEATURES</text>
+  <line x1="640" y1="553" x2="850" y2="553" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <text x="640" y="570" fill="#22c55e" font-size="7.5" font-weight="600" letter-spacing="1" opacity="0.6">DERIVED COLUMNS</text>
+  <text x="640" y="586" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8.5">
+    <tspan fill="#22c55e">sentiment_score</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#56d364">0.72</tspan>
+    <tspan x="640" dy="16" fill="#22c55e">sentiment_confidence</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#56d364">0.89</tspan>
+    <tspan x="640" dy="16" fill="#22c55e">event_risk_flag</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#fbbf24">1</tspan><tspan fill="#64748b">  </tspan><tspan fill="#475569">(medium)</tspan>
+    <tspan x="640" dy="16" fill="#22c55e">driver_count</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#56d364">3</tspan>
+    <tspan x="640" dy="16" fill="#22c55e">sentiment_ma_3</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#56d364">0.65</tspan>
+    <tspan x="640" dy="16" fill="#22c55e">sentiment_slope</tspan><tspan fill="#64748b"> = </tspan><tspan fill="#56d364">+0.08</tspan>
+  </text>
+
+  <line x1="640" y1="682" x2="850" y2="682" stroke="#1e1e24" stroke-width="0.3"/>
+  <text x="640" y="698" fill="#3b82f6" font-size="7.5" font-weight="600" letter-spacing="1" opacity="0.6">FED TO</text>
+  <text x="640" y="714" font-family="SF Mono,Fira Code,Consolas,monospace" font-size="8.5" fill="#64748b">
+    <tspan>LightGBM Feature Matrix</tspan>
+    <tspan x="640" dy="14">→ Column idx 47-52</tspan>
+    <tspan x="640" dy="14">→ 15</tspan>m/4h/Daily frames</tspan>
+  </text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="864" y1="648" x2="878" y2="648" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- ── Column 4: Signal Decision ── -->
+  <rect x="882" y="526" width="265" height="245" rx="8" fill="#0a0e14" stroke="#ef4444" stroke-width="0.8" stroke-opacity="0.4"/>
+  <text x="1014" y="546" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="700" letter-spacing="1.5">④ SIGNAL DECISION</text>
+  <line x1="892" y1="553" x2="1137" y2="553" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <!-- Check marks -->
+  <text x="892" y="574" font-size="11">✅</text>
+  <text x="910" y="574" font-size="9" fill="#22c55e" font-weight="600">Signal Quality Gate</text>
+  <text x="1110" y="574" text-anchor="end" font-size="8.5" fill="#56d364">PASS</text>
+
+  <text x="892" y="596" font-size="11">✅</text>
+  <text x="910" y="596" font-size="9" fill="#22c55e" font-weight="600">Risk Guard</text>
+  <text x="1110" y="596" text-anchor="end" font-size="8.5" fill="#56d364">PASS</text>
+
+  <text x="892" y="618" font-size="11">⚠️</text>
+  <text x="910" y="618" font-size="9" fill="#fbbf24" font-weight="600">Event Risk (medium)</text>
+  <text x="1110" y="618" text-anchor="end" font-size="8.5" fill="#fbbf24">CAUTION</text>
+
+  <text x="892" y="640" font-size="11">✅</text>
+  <text x="910" y="640" font-size="9" fill="#22c55e" font-weight="600">Confidence ≥ 0.7</text>
+  <text x="1110" y="640" text-anchor="end" font-size="8.5" fill="#56d364">0.89 ✓</text>
+
+  <text x="892" y="662" font-size="11">✅</text>
+  <text x="910" y="662" font-size="9" fill="#22c55e" font-weight="600">Sentiment Score ≥ 0.3</text>
+  <text x="1110" y="662" text-anchor="end" font-size="8.5" fill="#56d364">0.72 ✓</text>
+
+  <line x1="892" y1="675" x2="1137" y2="675" stroke="#1e1e24" stroke-width="0.5"/>
+
+  <!-- Final decision -->
+  <rect x="902" y="686" width="235" height="38" rx="6" fill="#22c55e" fill-opacity="0.06" stroke="#22c55e" stroke-width="1"/>
+  <text x="1019" y="702" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="700">SIGNAL: LONG ALLOWED</text>
+  <text x="1019" y="716" text-anchor="middle" fill="#64748b" font-size="8">Reduced position size (event_risk)</text>
+
+  <!-- ═══════════ METRICS BAR (Footer) ═══════════ -->
+  <line x1="40" y1="790" x2="1160" y2="790" stroke="#1a1a1f" stroke-width="0"/>
+
+  <!-- Decorative corners -->
+  <rect x="30" y="86" width="4" height="20" rx="2" fill="#fbbf24" opacity="0.15"/>
+  <rect x="1166" y="86" width="4" height="20" rx="2" fill="#fbbf24" opacity="0.15"/>
+
+  <!-- ═══════════ Integration callouts (arrows to main system) ═══════════ -->
+
+  <!-- Left callout: feeds into INFER -->
+  <rect x="40" y="348" width="130" height="30" rx="6" fill="#0a0e14" stroke="#fbbf24" stroke-width="0.8" stroke-opacity="0.3"/>
+  <text x="105" y="367" text-anchor="middle" fill="#fbbf24" font-size="8.5" font-weight="600">→ INFER phase</text>
+  <path d="M105,338 L105,348" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2" opacity="0.3"/>
+
+  <!-- Right callout: feeds into GOVERN -->
+  <rect x="1030" y="348" width="130" height="30" rx="6" fill="#0a0e14" stroke="#ef4444" stroke-width="0.8" stroke-opacity="0.3"/>
+  <text x="1095" y="367" text-anchor="middle" fill="#ef4444" font-size="8.5" font-weight="600">→ GOVERN phase</text>
+  <path d="M1038,338 L1065,348" fill="none" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2" opacity="0.3"/>
+
+  <!-- Watermark -->
+  <text x="1150" y="790" text-anchor="end" fill="#1a1a1f" font-size="7.5" font-weight="400">v1.0 · GenAI Pipeline Detail</text>
+</svg>
+</body>
+</html>
