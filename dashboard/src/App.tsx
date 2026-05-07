@@ -10,7 +10,7 @@ import BacktestPanel from "./components/BacktestPanel";
 import ConfigPanel from "./components/ConfigPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, Activity } from "lucide-react";
 
 const API_BASE = "/api";
 
@@ -66,6 +66,14 @@ interface DashboardData {
     };
   };
   risk: RiskData;
+  account?: Record<string, unknown> | null;
+  positions?: Array<Record<string, unknown>>;
+  orders?: Array<Record<string, unknown>>;
+  live_status?: {
+    status: string;
+    updated_at_utc: string | null;
+    error?: string | null;
+  };
   last_cycle: {
     timestamp_utc: string;
     signal: SignalData;
@@ -123,6 +131,7 @@ function App() {
 
   useEffect(() => {
     fetchDashboard();
+    const poll = window.setInterval(fetchDashboard, 10000);
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -144,7 +153,10 @@ function App() {
       }
     };
 
-    return () => ws.close();
+    return () => {
+      window.clearInterval(poll);
+      ws.close();
+    };
   }, [fetchDashboard]);
 
   const signal = data?.last_cycle?.signal;
@@ -186,6 +198,10 @@ function App() {
       n.includes("not_available"),
   );
   const infoNotes = notes.filter((n) => !issueNotes.includes(n));
+  const account = data?.account;
+  const positions = data?.positions || [];
+  const orders = data?.orders || [];
+  const liveStatus = data?.live_status;
 
   return (
     <DashboardLayout
@@ -275,6 +291,68 @@ function App() {
             gridEnabled={data?.config.grid_enabled}
             onUpdate={fetchDashboard}
           />
+        </div>
+
+        <div className={cell(hasNotes ? "lg:col-span-5" : "lg:col-span-7")}>
+          <Card className="h-full">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="size-3.5 text-primary" />
+                  Live MT5 State
+                </CardTitle>
+                <Badge variant={liveStatus?.status === "running" ? "gold" : "secondary"}>
+                  {liveStatus?.status?.toUpperCase() || "WAITING"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Equity
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {typeof account?.equity === "number" ? account.equity.toFixed(2) : "—"}
+                </span>
+              </div>
+              <div className="rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Free Margin
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {typeof account?.free_margin === "number"
+                    ? account.free_margin.toFixed(2)
+                    : "—"}
+                </span>
+              </div>
+              <div className="rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Open Positions
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {positions.length}
+                </span>
+              </div>
+              <div className="rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Orders Seen
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {orders.length}
+                </span>
+              </div>
+              <div className="col-span-2 rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Last Sync
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {liveStatus?.updated_at_utc
+                    ? new Date(liveStatus.updated_at_utc).toLocaleString()
+                    : "—"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* ── Row 3 continued: Cycle Notes ─────────────────────── */}

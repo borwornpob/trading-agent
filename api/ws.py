@@ -48,14 +48,16 @@ async def websocket_endpoint(ws: WebSocket):
             if msg.get("type") == "ping":
                 await ws.send_text(json.dumps({"type": "pong"}))
             elif msg.get("type") == "trigger_cycle":
-                from agent.autonomous_loop import run_cycle
-                result = run_cycle()
+                from agent.live_state import read_live_state
+                state = read_live_state()
+                last_cycle = state.get("last_cycle") or {}
+                signal = last_cycle.get("signal") or {}
                 await manager.broadcast({
                     "type": "cycle_complete",
-                    "timestamp": result.timestamp_utc,
-                    "direction": result.signal.direction if result.signal else "flat",
-                    "regime": result.regime,
-                    "notes": result.notes,
+                    "timestamp": last_cycle.get("timestamp_utc"),
+                    "direction": signal.get("direction", "flat"),
+                    "regime": signal.get("regime", "unknown"),
+                    "notes": last_cycle.get("notes", []),
                 })
     except WebSocketDisconnect:
         manager.disconnect(ws)

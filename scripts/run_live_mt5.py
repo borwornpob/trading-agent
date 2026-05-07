@@ -7,32 +7,22 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import dataclasses
 import json
 import sys
 import time
+import datetime as dt
 from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-def _jsonable(value: Any) -> Any:
-    if dataclasses.is_dataclass(value):
-        return {k: _jsonable(v) for k, v in dataclasses.asdict(value).items()}
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, dict):
-        return {str(k): _jsonable(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_jsonable(v) for v in value]
-    return value
-
-
 def _cycle_summary(result: Any, account: Any | None = None) -> dict[str, Any]:
+    from agent.live_state import to_jsonable
+
     return {
         "timestamp": result.timestamp_utc,
-        "account": _jsonable(account) if account is not None else None,
+        "account": to_jsonable(account) if account is not None else None,
         "direction": result.signal.direction if result.signal else "flat",
         "score": result.signal.score if result.signal else None,
         "conviction": result.signal.conviction if result.signal else None,
@@ -52,6 +42,13 @@ def main() -> None:
 
     from agent.autonomous_loop import run_cycle
     from agent.config import AgentConfig, MT5Settings
+    from agent.live_state import (
+        config_snapshot,
+        cycle_to_dashboard,
+        news_from_cycle,
+        to_jsonable,
+        update_live_state,
+    )
     from agent.mt5_gateway import MT5Gateway
 
     config = AgentConfig.from_env()
@@ -80,11 +77,39 @@ def main() -> None:
     try:
         gateway.connect()
         account = gateway.get_account()
-        print(json.dumps({"event": "mt5_connected", "account": _jsonable(account)}, default=str), flush=True)
+        update_live_state({
+            "status": "connected",
+            "updated_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+            "config": config_snapshot(config),
+            "account": to_jsonable(account),
+            "positions": [],
+            "orders": [],
+            "last_cycle": {},
+        })
+        print(json.dumps({"event": "mt5_connected", "account": to_jsonable(account)}, default=str), flush=True)
 
         def run_once() -> None:
             result = run_cycle(config=config, mt5_settings=mt5_settings, mt5_gateway=gateway)
-            summary = _cycle_summary(result, account=account)
+            account_latest = gateway.get_account()
+            positions = gateway.reconcile()
+            state = update_live_state({
+                "status": "running",
+                "updated_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+                "config": config_snapshot(config),
+                "risk": result.risk_state,
+                "account": to_jsonable(account_latest),
+                "positions": to_jsonable(positions),
+                "last_cycle": cycle_to_dashboard(result),
+                "news": news_from_cycle(result, config),
+            })
+            if result.orders_submitted:
+                orders = list(state.get("orders", []))
+                orders.extend({
+                    "timestamp_utc": result.timestamp_utc,
+                    **to_jsonable(order),
+                } for order in result.orders_submitted)
+                update_live_state({"orders": orders[-200:]})
+            summary = _cycle_summary(result, account=account_latest)
             if args.json:
                 print(json.dumps(summary, default=str), flush=True)
             else:
@@ -105,6 +130,11 @@ def main() -> None:
                 try:
                     run_once()
                 except Exception as exc:
+                    update_live_state({
+                        "status": "cycle_error",
+                        "updated_at_utc": dt.datetime.now(dt.UTC).isoformat(),
+                        "error": str(exc),
+                    })
                     print(json.dumps({"event": "cycle_error", "error": str(exc)}, default=str), flush=True)
                 time.sleep(max(1, args.interval))
         else:

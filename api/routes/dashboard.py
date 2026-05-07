@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from agent.autonomous_loop import run_cycle
 from agent.config import AgentConfig
+from agent.live_state import read_live_state
 from agent.risk.risk_guard import RiskConfig, RiskGuard
 from fastapi import APIRouter
 
@@ -53,6 +53,9 @@ async def get_dashboard() -> dict[str, Any]:
     """Current state snapshot: positions, P&L, signals, risk state, news."""
     global _last_cycle, _last_news
     config = AgentConfig.from_env()
+    live_state = read_live_state()
+    live_config = live_state.get("config") or {}
+    live_news = live_state.get("news") or _last_news
 
     risk_cfg = RiskConfig(
         shadow_mode=config.shadow_mode,
@@ -64,62 +67,33 @@ async def get_dashboard() -> dict[str, Any]:
 
     return {
         "config": {
-            "broker": config.broker,
-            "symbol": config.yahoo_symbol,
-            "broker_symbol": config.broker_symbol_name,
-            "bar_frequency": config.bar_frequency,
-            "shadow_mode": config.shadow_mode,
-            "kill_switch": config.kill_switch,
-            "grid_enabled": config.grid.enabled,
+            "broker": live_config.get("broker", config.broker),
+            "symbol": live_config.get("symbol", config.yahoo_symbol),
+            "broker_symbol": live_config.get("broker_symbol", config.broker_symbol_name),
+            "bar_frequency": live_config.get("bar_frequency", config.bar_frequency),
+            "shadow_mode": live_config.get("shadow_mode", config.shadow_mode),
+            "kill_switch": live_config.get("kill_switch", config.kill_switch),
+            "grid_enabled": live_config.get("grid_enabled", config.grid.enabled),
             "genai": _genai_config(config),
         },
-        "risk": guard.state_dict(),
-        "last_cycle": _last_cycle,
-        "news": _news_with_config(_last_news, config),
+        "risk": live_state.get("risk") or guard.state_dict(),
+        "account": live_state.get("account"),
+        "positions": live_state.get("positions", []),
+        "orders": live_state.get("orders", []),
+        "live_status": {
+            "status": live_state.get("status", "waiting_for_live_loop"),
+            "updated_at_utc": live_state.get("updated_at_utc"),
+            "error": live_state.get("error"),
+        },
+        "last_cycle": live_state.get("last_cycle") or _last_cycle,
+        "news": _news_with_config(live_news, config),
     }
 
 
 @router.post("/dashboard/refresh")
 async def refresh_dashboard() -> dict[str, Any]:
-    """Trigger a new autonomous cycle and return results."""
-    global _last_cycle, _last_news
-    result = run_cycle()
-
-    _last_cycle = {
-        "timestamp_utc": result.timestamp_utc,
-        "signal": {
-            "direction": result.signal.direction if result.signal else "unknown",
-            "pred_class": result.signal.pred_class if result.signal else 1,
-            "score": result.signal.score if result.signal else 0.0,
-            "p_up": result.signal.p_up if result.signal else 0.33,
-            "p_down": result.signal.p_down if result.signal else 0.33,
-            "regime": result.regime,
-            "sentiment": result.genai_sentiment,
-            "event_risk": result.event_risk,
-            "conviction": result.signal.conviction if result.signal else "low",
-        },
-        "execution_plan": {
-            "mode": result.execution_plan.mode if result.execution_plan else "flat",
-            "direction": result.execution_plan.direction
-            if result.execution_plan
-            else "flat",
-            "stop_loss": result.execution_plan.stop_loss_price
-            if result.execution_plan
-            else None,
-            "take_profit": result.execution_plan.take_profit_price
-            if result.execution_plan
-            else None,
-        },
-        "sr_prediction": result.sr_prediction,
-        "volatility": result.volatility,
-        "orders_submitted": result.orders_submitted,
-        "notes": result.notes,
-    }
-
-    # Collect full news sentiment data from the cycle
-    _last_news = _collect_news_from_cycle(result)
-
-    return _last_cycle
+    """Return the latest live-loop cycle without starting a second trading loop."""
+    return (await get_dashboard()).get("last_cycle") or {}
 
 
 def _collect_news_from_cycle(result: Any) -> dict[str, Any]:
@@ -140,10 +114,13 @@ def _collect_news_from_cycle(result: Any) -> dict[str, Any]:
 @router.get("/regime")
 async def get_regime() -> dict[str, Any]:
     """Current regime + S/R levels."""
-    return _last_cycle.get("sr_prediction", {})
+    state = read_live_state()
+    last_cycle = state.get("last_cycle") or _last_cycle
+    return last_cycle.get("sr_prediction", {})
 
 
 @router.get("/news")
 async def get_news() -> dict[str, Any]:
     """Recent news + sentiment scores with full headline breakdown."""
-    return _news_with_config(_last_news, AgentConfig.from_env())
+    state = read_live_state()
+    return _news_with_config(state.get("news") or _last_news, AgentConfig.from_env())
