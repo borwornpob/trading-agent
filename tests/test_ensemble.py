@@ -35,3 +35,23 @@ def test_predict_ensemble_no_secondary():
     result = predict_ensemble(model, df, ("f0", "f1", "f2", "f3", "f4"), None)
     assert "pred_class" in result.columns
     assert "p_up" in result.columns
+
+
+def test_predict_ensemble_fills_missing_live_features():
+    """Live inference should preserve trained feature shape when some columns are absent."""
+    from sklearn.ensemble import HistGradientBoostingClassifier
+
+    np.random.seed(7)
+    X = np.random.randn(100, 5)
+    y = np.random.choice([0, 1, 2], size=100)
+    model = HistGradientBoostingClassifier(max_iter=10, random_state=7)
+    model.fit(X, y)
+
+    df = pl.DataFrame({
+        "timestamp": pl.Series(["2024-01-01"]).str.strptime(pl.Datetime("ms"), "%Y-%m-%d"),
+        "f0": [0.1], "f1": [0.2], "f2": [0.3], "f3": [0.4],
+    })
+    result = predict_ensemble(model, df, ("f0", "f1", "f2", "f3", "f4"), None)
+
+    assert "pred_class" in result.columns
+    assert result.height == 1

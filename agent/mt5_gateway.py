@@ -55,7 +55,10 @@ class MT5Gateway:
             return
         try:
             if self._bridge is not None:
-                self._call(self._bridge.stop(), timeout=self.settings.command_timeout_seconds)
+                try:
+                    self._call(self._bridge.stop(), timeout=self.settings.command_timeout_seconds)
+                except Exception:
+                    pass
         finally:
             self._bridge = None
             self._loop.call_soon_threadsafe(self._loop.stop)

@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from agent.models.lgbm_model import predict_table
+from agent.models.lgbm_model import _aligned_feature_frame, predict_table
 
 Classifier = Any
 
@@ -121,14 +121,13 @@ def predict_mtf(
 
 def _get_proba(model: Classifier, df: pl.DataFrame, feature_names: tuple[str, ...]) -> np.ndarray:
     """Extract class probabilities from a model."""
-    present = [c for c in feature_names if c in df.columns]
-    sub = df.select(present).fill_null(0)
+    sub = _aligned_feature_frame(df, feature_names)
 
     if isinstance(model, MomentumQuantileClassifier):
         X = sub.to_numpy()
     elif type(model).__name__ in ("LGBMClassifier", "LogisticRegression"):
         X = sub.to_pandas()
-        X.columns = list(present)
+        X.columns = list(feature_names)
     else:
         X = sub.to_numpy()
 

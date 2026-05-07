@@ -151,15 +151,24 @@ def save_model_card(path: Path, card: dict[str, Any]) -> None:
 
 def _to_X(df: pl.DataFrame, feature_names: tuple[str, ...]) -> pd.DataFrame | np.ndarray:
     """Convert feature columns to model input. Uses pandas for LGBM, numpy otherwise."""
-    present = [c for c in feature_names if c in df.columns]
-    sub = df.select(present).fill_null(0)
+    sub = _aligned_feature_frame(df, feature_names)
 
     try:
         if LGBMClassifier is not None:
             X = sub.to_pandas()
-            X.columns = list(present)
+            X.columns = list(feature_names)
             return X
     except Exception:
         pass
 
     return sub.to_numpy()
+
+
+def _aligned_feature_frame(df: pl.DataFrame, feature_names: tuple[str, ...]) -> pl.DataFrame:
+    """Return exactly the trained feature columns, filling live-missing features with zero."""
+    return df.select([
+        pl.col(c).fill_null(0).cast(pl.Float64, strict=False).alias(c)
+        if c in df.columns
+        else pl.lit(0.0).alias(c)
+        for c in feature_names
+    ])
