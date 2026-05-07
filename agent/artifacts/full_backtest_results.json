@@ -1,26 +1,26 @@
 {
   "directional": {
-    "total_return_pct": 35.624545454545455,
-    "annualized_return": 187.0318181818182,
-    "annualized_vol": 26.755,
-    "sharpe": 7.168318181818182,
-    "sortino": 22.0855,
-    "max_drawdown_pct": -5.01,
-    "calmar": 68.75859090909091,
-    "win_rate": 0.6221818181818182,
+    "total_return_pct": -0.1661176470588235,
+    "annualized_return": -0.8710588235294119,
+    "annualized_vol": 0.4328235294117647,
+    "sharpe": -0.3276117647058824,
+    "sortino": -0.31914117647058826,
+    "max_drawdown_pct": -0.24858823529411764,
+    "calmar": -0.44703529411764703,
+    "win_rate": 0.04238823529411764,
     "num_trades": 48.0,
-    "profit_factor": 4.605772727272728,
-    "regime": "trending_up",
-    "n_trades": 9.727272727272727,
-    "grid_pnl": 4641.619250088034
+    "profit_factor": Infinity,
+    "regime": "volatile",
+    "n_trades": 0.611764705882353,
+    "grid_pnl": 625.5498738523822
   },
   "grid": {
-    "total_pnl": 7981.54,
-    "n_grids": 444,
-    "n_tp": 417,
-    "n_sl": 27,
-    "avg_pnl_per_grid": 17.98
+    "total_pnl": 824.37,
+    "n_grids": 59,
+    "n_tp": 56,
+    "n_sl": 1,
+    "avg_pnl_per_grid": 13.97
   },
-  "n_folds": 22,
-  "combined_pnl": 8017.17
+  "n_folds": 85,
+  "combined_pnl": 824.21
 }
