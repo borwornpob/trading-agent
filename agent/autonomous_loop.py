@@ -83,6 +83,7 @@ class CycleResult:
     timestamp_utc: str
     signal: TradeSignal | None = None
     regime: str = "unknown"
+    market_data_source: str = "unknown"
     execution_plan: ExecutionPlan | None = None
     sr_prediction: dict[str, Any] = field(default_factory=dict)
     volatility: dict[str, Any] = field(default_factory=dict)
@@ -137,7 +138,14 @@ def run_cycle(
     start = start_dt.date().isoformat()
 
     try:
-        if is_intraday(config.bar_frequency):
+        if config.broker == "mt5" and mt5_gateway is not None:
+            raw = mt5_gateway.fetch_ohlcv(
+                symbol=config.broker_symbol_name,
+                frequency=config.bar_frequency,
+                count=mt5_settings.rate_count,
+            )
+            result.market_data_source = "mt5"
+        elif is_intraday(config.bar_frequency):
             raw = fetch_ohlcv_yahoo(
                 config.yahoo_symbol,
                 "",
@@ -145,8 +153,10 @@ def run_cycle(
                 frequency=config.bar_frequency,
                 period="60d",
             )
+            result.market_data_source = "yahoo"
         else:
             raw = fetch_ohlcv_yahoo(config.yahoo_symbol, start, end, frequency=config.bar_frequency)
+            result.market_data_source = "yahoo"
     except Exception as e:
         notes.append(f"data_fetch_error:{e}")
         result.notes = notes

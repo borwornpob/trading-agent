@@ -22,6 +22,7 @@ def _cycle_summary(result: Any, account: Any | None = None) -> dict[str, Any]:
 
     return {
         "timestamp": result.timestamp_utc,
+        "market_data_source": result.market_data_source,
         "account": to_jsonable(account) if account is not None else None,
         "direction": result.signal.direction if result.signal else "flat",
         "score": result.signal.score if result.signal else None,
@@ -116,6 +117,7 @@ def main() -> None:
                 print(
                     (
                         f"{summary['timestamp']} "
+                        f"data={summary['market_data_source']} "
                         f"direction={summary['direction']} "
                         f"regime={summary['regime']} "
                         f"mode={summary['execution_mode']} "

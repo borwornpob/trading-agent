@@ -44,6 +44,7 @@ def update_live_state(patch: dict[str, Any], path: Path | None = None) -> dict[s
 def cycle_to_dashboard(result: Any) -> dict[str, Any]:
     return {
         "timestamp_utc": result.timestamp_utc,
+        "market_data_source": result.market_data_source,
         "signal": {
             "direction": result.signal.direction if result.signal else "unknown",
             "pred_class": result.signal.pred_class if result.signal else 1,

@@ -7,12 +7,15 @@ then this wrapper exposes synchronous methods for the existing live loop.
 from __future__ import annotations
 
 import asyncio
+import datetime as dt
 import sys
 import threading
 from concurrent.futures import Future
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import polars as pl
 
 from agent.config import MT5Settings
 
@@ -169,6 +172,35 @@ class MT5Gateway:
             )
         )
 
+    def fetch_ohlcv(self, *, symbol: str, frequency: str, count: int | None = None) -> pl.DataFrame:
+        """Fetch OHLCV bars directly from the connected MT5 EA."""
+        self._require_bridge()
+        from mt5_bridge import Timeframe
+
+        timeframe = self._timeframe(frequency, Timeframe)
+        rates = self._call(
+            self._bridge.get_rates(symbol, timeframe, count or self.settings.rate_count),
+            timeout=self.settings.command_timeout_seconds,
+        )
+        if not rates:
+            return _empty_ohlcv()
+
+        rows = []
+        for rate in rates:
+            rows.append({
+                "timestamp": _parse_mt5_time(rate.get("time")),
+                "open": float(rate.get("open", 0.0)),
+                "high": float(rate.get("high", 0.0)),
+                "low": float(rate.get("low", 0.0)),
+                "close": float(rate.get("close", 0.0)),
+                "volume": float(rate.get("volume", 0.0)),
+            })
+        return (
+            pl.DataFrame(rows)
+            .with_columns(pl.col("timestamp").cast(pl.Datetime("ms")))
+            .sort("timestamp")
+        )
+
     async def _connect_async(self) -> Any:
         from mt5_bridge import MT5Bridge
 
@@ -206,3 +238,61 @@ class MT5Gateway:
     @staticmethod
     def _position_side(order_type: str) -> str:
         return "buy" if "BUY" in order_type.upper() else "sell"
+
+    @staticmethod
+    def _timeframe(frequency: str, timeframe_enum: Any) -> Any:
+        freq = frequency.strip().lower()
+        mapping = {
+            "1m": "M1",
+            "m1": "M1",
+            "5m": "M5",
+            "m5": "M5",
+            "15m": "M15",
+            "15min": "M15",
+            "15minute": "M15",
+            "m15": "M15",
+            "30m": "M30",
+            "30min": "M30",
+            "30minute": "M30",
+            "1h": "H1",
+            "hourly": "H1",
+            "h1": "H1",
+            "4h": "H4",
+            "4hour": "H4",
+            "h4": "H4",
+            "daily": "D1",
+            "1d": "D1",
+            "d1": "D1",
+        }
+        name = mapping.get(freq)
+        if name is None:
+            raise ValueError(f"Unsupported MT5 timeframe: {frequency}")
+        return getattr(timeframe_enum, name)
+
+
+def _empty_ohlcv() -> pl.DataFrame:
+    return pl.DataFrame(schema={
+        "timestamp": pl.Datetime("ms"),
+        "open": pl.Float64,
+        "high": pl.Float64,
+        "low": pl.Float64,
+        "close": pl.Float64,
+        "volume": pl.Float64,
+    })
+
+
+def _parse_mt5_time(value: Any) -> dt.datetime:
+    if isinstance(value, dt.datetime):
+        return value.replace(tzinfo=None)
+    if isinstance(value, (int, float)):
+        return dt.datetime.fromtimestamp(float(value), tz=dt.UTC).replace(tzinfo=None)
+    text = str(value or "").strip()
+    for fmt in ("%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return dt.datetime.strptime(text, fmt)
+        except ValueError:
+            pass
+    try:
+        return dt.datetime.fromisoformat(text.replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError as exc:
+        raise ValueError(f"Unsupported MT5 rate time: {value!r}") from exc

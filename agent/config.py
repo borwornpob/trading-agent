@@ -75,6 +75,7 @@ class MT5Settings:
     port: int
     connection_timeout_seconds: float
     command_timeout_seconds: float
+    rate_count: int
     magic: int
 
     @classmethod
@@ -86,6 +87,7 @@ class MT5Settings:
             port=_env_int("MT5_PORT", 1111),
             connection_timeout_seconds=_env_float("MT5_CONNECTION_TIMEOUT_SECONDS", 120.0),
             command_timeout_seconds=_env_float("MT5_COMMAND_TIMEOUT_SECONDS", 45.0),
+            rate_count=_env_int("MT5_RATE_COUNT", 1500),
             magic=_env_int("MT5_MAGIC", 240501),
         )
 

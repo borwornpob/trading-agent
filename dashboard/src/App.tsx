@@ -76,6 +76,7 @@ interface DashboardData {
   };
   last_cycle: {
     timestamp_utc: string;
+    market_data_source?: string;
     signal: SignalData;
     execution_plan: {
       mode: string;
@@ -339,6 +340,14 @@ function App() {
                 </span>
                 <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
                   {orders.length}
+                </span>
+              </div>
+              <div className="col-span-2 rounded-lg bg-surface-2 px-4 py-3">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-foreground/65">
+                  Market Data
+                </span>
+                <span className="mt-0.5 block font-mono text-xs font-bold tabular-nums">
+                  {data?.last_cycle?.market_data_source?.toUpperCase() || "—"}
                 </span>
               </div>
               <div className="col-span-2 rounded-lg bg-surface-2 px-4 py-3">
