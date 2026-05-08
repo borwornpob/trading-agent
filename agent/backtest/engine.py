@@ -132,11 +132,11 @@ def run_vectorized_backtest(
             pnl = position * (price - prev_price) / prev_price * abs(position) * equity
             equity += pnl
 
-        # Signal action (classes: 1=down, 2=neutral, 3=up)
+        # Signal action (classes: 0=down, 1=neutral, 2=up)
         target = 0.0
-        if prev_pred == 3:
+        if prev_pred == 2:
             target = units
-        elif prev_pred == 1:
+        elif prev_pred == 0:
             target = -units
 
         if target != position:
@@ -364,11 +364,11 @@ def run_sl_tp_backtest(
 
         prev_pred = preds[i - 1]
         target = 0
-        if prev_pred == 3:
+        if prev_pred == 2:
             target = 1  # long
-        elif prev_pred == 1:
+        elif prev_pred == 0:
             target = -1  # short
-        # pred_class == 2 => neutral => target = 0
+        # pred_class == 1 => neutral => target = 0
 
         # If target differs from current position, close then potentially open new
         if target != position:
@@ -728,9 +728,9 @@ def run_grid_backtest(
 
         prev_pred = preds[i - 1]
         target = 0
-        if prev_pred == 3:
+        if prev_pred == 2:
             target = 1  # long
-        elif prev_pred == 1:
+        elif prev_pred == 0:
             target = -1  # short
 
         if target != position:

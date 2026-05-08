@@ -59,7 +59,7 @@ def simulate_grid(
 
     signal = TradeSignal(
         direction=direction,
-        pred_class=3 if is_long else 1,
+        pred_class=2 if is_long else 0,
         score=1.0 if is_long else -1.0,
         p_up=0.8 if is_long else 0.2,
         p_down=0.2 if is_long else 0.8,

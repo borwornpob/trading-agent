@@ -13,7 +13,7 @@ from agent.strategy.gold_strategy import TradeSignal
 def _ranging_signal(direction: str = "long") -> TradeSignal:
     return TradeSignal(
         direction=direction,
-        pred_class=3 if direction == "long" else 1,
+        pred_class=2 if direction == "long" else 0,
         score=0.75 if direction == "long" else -0.75,
         p_up=0.8 if direction == "long" else 0.2,
         p_down=0.2 if direction == "long" else 0.8,

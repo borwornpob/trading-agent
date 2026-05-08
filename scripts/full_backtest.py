@@ -138,11 +138,11 @@ def run_full_backtest(
                 continue
 
             # Determine target position
-            # Classes are 1=down, 2=neutral, 3=up (target = label+1)
+            # Classes are 0=down, 1=neutral, 2=up
             target = 0.0
-            if prev_pred == 3:  # UP
+            if prev_pred == 2:  # UP
                 target = 1.0
-            elif prev_pred == 1:  # DOWN
+            elif prev_pred == 0:  # DOWN
                 target = -1.0
 
             # Risk guard check

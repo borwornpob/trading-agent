@@ -40,10 +40,10 @@ def signal_from_prediction(
     score = float(row.get("score", 0.0))
 
     direction = "flat"
-    # Classes: 1=down, 2=neutral, 3=up (target = label+1)
-    if pc == 3 and p_up >= min_p_up:
+    # Classes: 0=down, 1=neutral, 2=up.
+    if pc == 2 and p_up >= min_p_up:
         direction = "long"
-    elif pc == 1 and p_down >= min_p_down:
+    elif pc == 0 and p_down >= min_p_down:
         direction = "short"
 
     # GenAI veto: if strong sentiment against direction, flatten
@@ -74,9 +74,9 @@ def signal_from_prediction(
 
 def pred_to_side(row: dict[str, Any], *, allow_short: bool = True) -> str:
     """Simple direction mapping (backward compat with hard_demo pattern)."""
-    pc = int(row.get("pred_class", 2))
-    if pc == 3:
+    pc = int(row.get("pred_class", 1))
+    if pc == 2:
         return "buy"
-    if pc == 1 and allow_short:
+    if pc == 0 and allow_short:
         return "sell"
     return "flat"

@@ -278,6 +278,10 @@ def run_cycle(
         event_risk=event_risk,
     )
     result.signal = signal
+    if signal.direction == "flat":
+        notes.append(
+            f"signal_flat:class_{signal.pred_class}_p_up_{signal.p_up:.3f}_p_down_{signal.p_down:.3f}"
+        )
 
     gates_passed, gate_results = run_all_gates(
         signal.direction, signal.p_up, signal.p_down, signal.score,
@@ -323,6 +327,7 @@ def run_cycle(
         atr=float(vol) if vol else None,
     )
     result.execution_plan = plan
+    notes.extend(plan.notes)
 
     # ── EXECUTE: submit orders (if not shadow) ─────────────────
     if plan.direction != "flat" and not config.shadow_mode and not config.kill_switch:
