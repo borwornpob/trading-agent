@@ -4,6 +4,21 @@ import numpy as np
 import polars as pl
 import pytest
 from agent.models.ensemble import MomentumQuantileClassifier, predict_ensemble
+from agent.models.lgbm_model import predict_table
+
+
+class OneTwoThreeModel:
+    classes_ = np.array([1, 2, 3])
+
+    def predict(self, X):
+        return np.array([3, 2, 1])[: len(X)]
+
+    def predict_proba(self, X):
+        return np.array([
+            [0.05, 0.10, 0.85],
+            [0.10, 0.80, 0.10],
+            [0.70, 0.20, 0.10],
+        ])[: len(X)]
 
 
 def test_momentum_classifier():
@@ -55,3 +70,17 @@ def test_predict_ensemble_fills_missing_live_features():
 
     assert "pred_class" in result.columns
     assert result.height == 1
+
+
+def test_predict_table_normalizes_one_two_three_labels():
+    df = pl.DataFrame({
+        "timestamp": pl.Series(["2024-01-01", "2024-01-02", "2024-01-03"]).str.strptime(pl.Datetime("ms"), "%Y-%m-%d"),
+        "f0": [0.1, 0.2, 0.3],
+    })
+
+    result = predict_table(OneTwoThreeModel(), df, ("f0",))
+
+    assert result["pred_class"].to_list() == [2, 1, 0]
+    assert result["p_down"].to_list() == [0.05, 0.10, 0.70]
+    assert result["p_neutral"].to_list() == [0.10, 0.80, 0.20]
+    assert result["p_up"].to_list() == [0.85, 0.10, 0.10]

@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from agent.models.lgbm_model import _aligned_feature_frame, predict_table
+from agent.models.lgbm_model import _aligned_feature_frame, predict_table, semantic_probability_columns
 
 Classifier = Any
 
@@ -131,4 +131,4 @@ def _get_proba(model: Classifier, df: pl.DataFrame, feature_names: tuple[str, ..
     else:
         X = sub.to_numpy()
 
-    return np.asarray(model.predict_proba(X), dtype=np.float64)
+    return semantic_probability_columns(model, np.asarray(model.predict_proba(X), dtype=np.float64))

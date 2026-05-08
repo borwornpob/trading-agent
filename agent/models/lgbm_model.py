@@ -92,14 +92,10 @@ def predict_table(
 ) -> pl.DataFrame:
     """Run prediction on a DataFrame, return columns: timestamp, symbol, pred_class, p_down, p_neutral, p_up, score."""
     X = _to_X(df, feature_names)
-    pred = model.predict(X)
+    pred = np.asarray(model.predict(X))
     proba = np.asarray(model.predict_proba(X), dtype=np.float64)
-
-    # Ensure 3 columns
-    if proba.shape[1] == 2:
-        proba = np.column_stack([proba[:, 0], 1 - proba.sum(axis=1), proba[:, 1]])
-    elif proba.shape[1] > 3:
-        proba = proba[:, :3]
+    proba = semantic_probability_columns(model, proba)
+    pred = normalize_class_predictions(model, pred)
 
     out = df.select("timestamp")
     if "symbol" in df.columns:
@@ -142,6 +138,52 @@ def load_bundle(path: Path) -> dict[str, Any]:
     if isinstance(raw, dict) and "model" in raw:
         return raw
     return {"model": raw, "feature_names": [], "meta": {}, "ensemble_secondary": None}
+
+
+def normalize_class_predictions(model: Classifier, pred: np.ndarray) -> np.ndarray:
+    """Normalize model labels to 0=down, 1=neutral, 2=up."""
+    classes = _model_classes(model, len(np.unique(pred)))
+    mapping = _semantic_class_mapping(classes)
+    return np.asarray([mapping.get(int(label), int(label)) for label in pred], dtype=np.int64)
+
+
+def semantic_probability_columns(model: Classifier, proba: np.ndarray) -> np.ndarray:
+    """Return probability columns ordered as down, neutral, up."""
+    proba = np.asarray(proba, dtype=np.float64)
+    if proba.ndim != 2:
+        raise ValueError("predict_proba output must be a 2D array")
+
+    classes = _model_classes(model, proba.shape[1])
+    mapping = _semantic_class_mapping(classes)
+    out = np.zeros((proba.shape[0], 3), dtype=np.float64)
+
+    for idx, class_label in enumerate(classes[: proba.shape[1]]):
+        semantic_idx = mapping.get(int(class_label))
+        if semantic_idx is not None and 0 <= semantic_idx <= 2:
+            out[:, semantic_idx] = proba[:, idx]
+
+    if not out.any() and proba.shape[1] >= 3:
+        out = proba[:, :3]
+    elif not out.any() and proba.shape[1] == 2:
+        out = np.column_stack([proba[:, 0], np.zeros(proba.shape[0]), proba[:, 1]])
+
+    return out
+
+
+def _model_classes(model: Classifier, n_columns: int) -> list[int]:
+    raw_classes = getattr(model, "classes_", None)
+    if raw_classes is None:
+        return list(range(n_columns))
+    return [int(c) for c in list(raw_classes)]
+
+
+def _semantic_class_mapping(classes: list[int]) -> dict[int, int]:
+    class_set = set(classes)
+    if class_set == {1, 2, 3}:
+        return {1: 0, 2: 1, 3: 2}
+    if class_set == {0, 1, 2}:
+        return {0: 0, 1: 1, 2: 2}
+    return {label: idx for idx, label in enumerate(sorted(classes)) if idx <= 2}
 
 
 def save_model_card(path: Path, card: dict[str, Any]) -> None:
