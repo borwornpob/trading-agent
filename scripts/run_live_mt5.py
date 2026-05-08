@@ -113,6 +113,22 @@ def main() -> None:
                     **to_jsonable(order),
                 } for order in result.orders_submitted)
                 update_live_state({"orders": orders[-200:]})
+            cycles = list(state.get("cycles", []))
+            cycles.append({
+                "timestamp_utc": result.timestamp_utc,
+                "market_data_source": result.market_data_source,
+                "direction": result.signal.direction if result.signal else "flat",
+                "pred_class": result.signal.pred_class if result.signal else None,
+                "p_up": result.signal.p_up if result.signal else None,
+                "p_down": result.signal.p_down if result.signal else None,
+                "score": result.signal.score if result.signal else None,
+                "conviction": result.signal.conviction if result.signal else None,
+                "regime": result.regime,
+                "execution_mode": result.execution_plan.mode if result.execution_plan else "flat",
+                "orders_count": len(result.orders_submitted),
+                "notes": result.notes,
+            })
+            update_live_state({"cycles": cycles[-500:]})
             summary = _cycle_summary(result, account=account_latest)
             if args.json:
                 print(json.dumps(summary, default=str), flush=True)

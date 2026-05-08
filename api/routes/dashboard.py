@@ -86,6 +86,7 @@ async def get_dashboard() -> dict[str, Any]:
             "error": live_state.get("error"),
         },
         "last_cycle": live_state.get("last_cycle") or _last_cycle,
+        "cycles": live_state.get("cycles", []),
         "news": _news_with_config(live_news, config),
     }
 

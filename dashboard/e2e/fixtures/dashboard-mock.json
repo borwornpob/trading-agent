@@ -19,9 +19,10 @@
   },
   "last_cycle": {
     "timestamp_utc": "2026-04-27T16:51:49.000000+00:00",
+    "market_data_source": "mt5",
     "signal": {
       "direction": "long",
-      "pred_class": 3,
+      "pred_class": 2,
       "score": 0.66,
       "p_up": 0.829153,
       "p_down": 0.169422,
@@ -49,6 +50,30 @@
     "orders_submitted": [],
     "notes": ["shadow_mode: no_orders_submitted"]
   },
+  "cycles": [
+    {
+      "timestamp_utc": "2026-04-27T16:46:49.000000+00:00",
+      "market_data_source": "mt5",
+      "direction": "flat",
+      "pred_class": 1,
+      "p_up": 0.21,
+      "p_down": 0.18,
+      "execution_mode": "flat",
+      "orders_count": 0,
+      "notes": ["signal_direction_is_flat"]
+    },
+    {
+      "timestamp_utc": "2026-04-27T16:51:49.000000+00:00",
+      "market_data_source": "mt5",
+      "direction": "long",
+      "pred_class": 2,
+      "p_up": 0.829153,
+      "p_down": 0.169422,
+      "execution_mode": "trend",
+      "orders_count": 0,
+      "notes": ["shadow_mode: no_orders_submitted"]
+    }
+  ],
   "news": {
     "headlines": [],
     "sentiment": 0,

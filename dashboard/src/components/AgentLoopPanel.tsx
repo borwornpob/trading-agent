@@ -36,6 +36,7 @@ type PhaseStatus = "completed" | "active" | "pending" | "error";
 interface Props {
   lastCycle: {
     timestamp_utc?: string;
+    market_data_source?: string;
     notes?: string[];
     signal?: {
       direction: string;
@@ -51,6 +52,17 @@ interface Props {
     volatility?: Record<string, number>;
     orders_submitted?: Array<Record<string, unknown>>;
   } | null;
+  cycles?: Array<{
+    timestamp_utc?: string;
+    market_data_source?: string;
+    direction?: string;
+    pred_class?: number | null;
+    p_up?: number | null;
+    p_down?: number | null;
+    execution_mode?: string;
+    orders_count?: number;
+    notes?: string[];
+  }>;
 }
 
 function phaseStatus(
@@ -103,8 +115,19 @@ const PhaseStatusIcon = ({
   }
 };
 
-export default function AgentLoopPanel({ lastCycle }: Props) {
+function formatSource(source?: string) {
+  if (!source) return "Unknown";
+  return source.toUpperCase();
+}
+
+function formatProbability(value?: number | null) {
+  if (typeof value !== "number") return "—";
+  return `${(value * 100).toFixed(1)}%`;
+}
+
+export default function AgentLoopPanel({ lastCycle, cycles = [] }: Props) {
   const hasData = lastCycle && lastCycle.signal;
+  const recentCycles = cycles.slice(-6).reverse();
 
   const phases: LoopPhase[] = [
     {
@@ -115,7 +138,7 @@ export default function AgentLoopPanel({ lastCycle }: Props) {
       items: [
         {
           label: "OHLCV Data",
-          value: hasData ? "Yahoo Finance" : undefined,
+          value: hasData ? formatSource(lastCycle?.market_data_source) : undefined,
           status: hasData ? "ok" : "skip",
         },
         {
@@ -404,6 +427,43 @@ export default function AgentLoopPanel({ lastCycle }: Props) {
                   : "—"}
               </span>
             </div>
+            {recentCycles.length > 0 && (
+              <div className="overflow-hidden rounded-lg border border-border/60">
+                <div className="grid grid-cols-[1.05fr_0.75fr_0.75fr_0.9fr] gap-2 bg-surface-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <span>Time</span>
+                  <span>Model</span>
+                  <span>Signal</span>
+                  <span className="text-right">Orders</span>
+                </div>
+                <div className="divide-y divide-border/60">
+                  {recentCycles.map((cycle, index) => (
+                    <div
+                      key={`${cycle.timestamp_utc || "cycle"}-${index}`}
+                      className="grid grid-cols-[1.05fr_0.75fr_0.75fr_0.9fr] gap-2 px-3 py-2 text-[11px]"
+                    >
+                      <span className="min-w-0 truncate font-mono text-muted-foreground">
+                        {cycle.timestamp_utc
+                          ? new Date(cycle.timestamp_utc).toLocaleTimeString("en-US", {
+                              hour12: false,
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </span>
+                      <span className="min-w-0 truncate font-mono font-semibold text-foreground">
+                        C{cycle.pred_class ?? "?"} U{formatProbability(cycle.p_up)}
+                      </span>
+                      <span className="min-w-0 truncate font-mono font-semibold text-foreground">
+                        {(cycle.direction || "flat").toUpperCase()}
+                      </span>
+                      <span className="min-w-0 truncate text-right font-mono text-muted-foreground">
+                        {cycle.orders_count ?? 0} / {(cycle.execution_mode || "flat").toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </CardContent>

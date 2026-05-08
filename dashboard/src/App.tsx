@@ -89,6 +89,20 @@ interface DashboardData {
     orders_submitted: Array<Record<string, unknown>>;
     notes: string[];
   } | null;
+  cycles?: Array<{
+    timestamp_utc?: string;
+    market_data_source?: string;
+    direction?: string;
+    pred_class?: number | null;
+    p_up?: number | null;
+    p_down?: number | null;
+    score?: number | null;
+    conviction?: string | null;
+    regime?: string;
+    execution_mode?: string;
+    orders_count?: number;
+    notes?: string[];
+  }>;
   news?: {
     headlines?: NewsItem[];
     sentiment?: number;
@@ -278,7 +292,10 @@ function App() {
           )}
           data-bento="agent"
         >
-          <AgentLoopPanel lastCycle={data?.last_cycle ?? null} />
+          <AgentLoopPanel
+            lastCycle={data?.last_cycle ?? null}
+            cycles={data?.cycles ?? []}
+          />
         </div>
 
         {/* ── Row 3: Backtest + Config ─────────────────────────── */}
